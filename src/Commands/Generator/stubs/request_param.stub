@@ -1,0 +1,14 @@
+<?php
+
+declare(strict_types=1);
+
+namespace %NAMESPACE%;
+
+use Fatbit\FormRequestParam\Abstracts\AbstractFormRequestParam;
+use Fatbit\FormRequestParam\Annotations\FormRequestRule;
+use Fatbit\FormRequestParam\Annotations\FormRequestArrayRule;
+
+class %CLASS% extends AbstractFormRequestParam
+{
+
+}
