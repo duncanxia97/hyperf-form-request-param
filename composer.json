@@ -26,5 +26,10 @@
     "psr-4": {
       "Fatbit\\FormRequestParam\\": "src/"
     }
+  },
+  "extra": {
+    "hyperf": {
+      "config": "Fatbit\\FormRequestParam\\ConfigProvider"
+    }
   }
 }
