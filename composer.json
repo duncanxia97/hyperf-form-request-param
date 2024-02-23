@@ -18,9 +18,9 @@
   ],
   "require": {
     "php": "^8.0",
-    "hyperf/validation": ">=3.0.0",
-    "hyperf/contract": ">=3.0.0",
-    "hyperf/devtool": ">=3.0.0"
+    "hyperf/validation": ">=2.2",
+    "hyperf/contract": ">=2.2",
+    "hyperf/devtool": ">=2.2"
   },
   "autoload": {
     "psr-4": {
