@@ -6,8 +6,10 @@
 
 namespace Fatbit\FormRequestParam\Traits;
 
-use Hyperf\Contract\Arrayable;
-use Hyperf\Contract\Jsonable;
+
+
+use Hyperf\Utils\Contracts\Arrayable;
+use Hyperf\Utils\Contracts\Jsonable;
 
 /**
  * @implements Arrayable

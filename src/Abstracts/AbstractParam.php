@@ -7,8 +7,8 @@
 namespace Fatbit\FormRequestParam\Abstracts;
 
 use Fatbit\FormRequestParam\Traits\FillParams;
-use Hyperf\Contract\Arrayable;
-use Hyperf\Contract\Jsonable;
+use Hyperf\Utils\Contracts\Arrayable;
+use Hyperf\Utils\Contracts\Jsonable;
 
 abstract class AbstractParam implements Arrayable, Jsonable
 {

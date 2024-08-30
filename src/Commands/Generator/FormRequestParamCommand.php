@@ -8,7 +8,7 @@ namespace Fatbit\FormRequestParam\Commands\Generator;
 
 use Hyperf\Command\Annotation\Command;
 use Hyperf\Devtool\Generator\GeneratorCommand;
-use Hyperf\Stringable\Str;
+use Hyperf\Utils\Str;
 
 #[Command]
 class FormRequestParamCommand extends GeneratorCommand
@@ -20,7 +20,7 @@ class FormRequestParamCommand extends GeneratorCommand
         parent::__construct('gen:'.Str::snake($this->classSuffix, '-'));
     }
 
-    public function qualifyClass(string $name): string
+    public function qualifyClass($name): string
     {
         $name = implode(
             '/',

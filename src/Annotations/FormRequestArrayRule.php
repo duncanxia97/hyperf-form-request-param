@@ -7,9 +7,9 @@
 namespace Fatbit\FormRequestParam\Annotations;
 
 
-use Hyperf\Contract\Arrayable;
-use Hyperf\Contract\Jsonable;
 use Fatbit\FormRequestParam\Traits\ToArrayJson;
+use Hyperf\Utils\Contracts\Arrayable;
+use Hyperf\Utils\Contracts\Jsonable;
 
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
 class FormRequestArrayRule implements Arrayable, Jsonable
