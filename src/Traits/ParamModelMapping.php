@@ -25,7 +25,7 @@ trait ParamModelMapping
      *
      * @return object|null|T
      */
-    public function getModel(string $model): ?object
+    public function toModel(string $model): ?object
     {
         if (empty($this->modelMapping)) {
             $this->loadModelMapping();
@@ -70,7 +70,7 @@ trait ParamModelMapping
                 }
                 $propertyName                                              = empty($modelMapping->filed) ? $thisProperty->getName(
                 ) : $modelMapping->filed;
-                $this->modelMapping[$modelMapping->model]->{$propertyName} = $this->{$propertyName};
+                $this->modelMapping[$modelMapping->model]->{$propertyName} = $this->{$thisProperty->getName()};
                 if (!empty($modelMapping->modelAlias)) {
                     $modelMapping->modelAlias = &$this->modelMapping[$modelMapping->model];
                 }
