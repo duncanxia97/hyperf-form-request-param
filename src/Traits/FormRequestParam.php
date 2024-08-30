@@ -19,28 +19,9 @@ use Fatbit\FormRequestParam\FormRequestRulesParam;
  */
 trait FormRequestParam
 {
+    use GetAttributes;
+
     protected static ?FormRequestRulesParam $formRequestRule = null;
-
-
-    /**
-     * @author XJ.
-     * @Date   2023/8/28 0028
-     * @return ReflectionClass
-     */
-    protected static function getThisReflectionClass(): ReflectionClass
-    {
-        return new ReflectionClass(static::class);
-    }
-
-    /**
-     * @author XJ.
-     * @Date   2023/8/28 0028
-     * @return array|ReflectionProperty[]
-     */
-    protected static function getThisProperties(): array
-    {
-        return static::getThisReflectionClass()->getProperties();
-    }
 
     /**
      * @author XJ.
@@ -52,7 +33,7 @@ trait FormRequestParam
      */
     protected static function getPropertyFormRequestRule(ReflectionProperty $reflectionProperty): ?FormRequestRule
     {
-        return ($reflectionProperty->getAttributes(FormRequestRule::class)[0] ?? null)?->newInstance();
+        return static::getPropertyAttribute($reflectionProperty, FormRequestRule::class);
     }
 
     /**
@@ -67,7 +48,7 @@ trait FormRequestParam
      */
     protected static function getPropertyFormRequestArrayRules(ReflectionProperty $reflectionProperty): array
     {
-        return $reflectionProperty->getAttributes(FormRequestArrayRule::class);
+        return static::getPropertyAttributes($reflectionProperty, FormRequestRule::class);
     }
 
     /**
