@@ -72,16 +72,14 @@ trait GetAttributes
      *
      * @author XJ.
      * @Date   2024/9/2 星期一
-     * @template T
      *
-     * @param ReflectionAttribute    $reflectionAttribute
-     * @param string|class-string<T> $attributeName
+     * @param ReflectionAttribute $reflectionAttribute
      *
-     * @return T
      */
     protected static function getReflectionAttributeInstance(ReflectionAttribute $reflectionAttribute): object
     {
         $className = $reflectionAttribute->getName();
+
         return new $className(...$reflectionAttribute->getArguments());
     }
 }

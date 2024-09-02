@@ -16,11 +16,17 @@ namespace Fatbit\FormRequestParam\Annotations;
 class ModelMapping
 {
 
+    /**
+     * @param string      $model  模型类
+     * @param string|null $filed      字段名
+     * @param string|null $modelAlias 别名
+     */
     public function __construct(
         public string  $model,
-        public ?string  $filed = null,
+        public ?string $filed = null,
         public ?string $modelAlias = null,
     )
-    {}
+    {
+    }
 
 }
