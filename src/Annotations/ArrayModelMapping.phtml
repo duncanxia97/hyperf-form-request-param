@@ -1,0 +1,26 @@
+<?php
+/**
+ * @author XJ.
+ * @Date   2024/9/2 星期一
+ */
+
+namespace Fatbit\FormRequestParam\Annotations;
+
+class ArrayModelMapping
+{
+    /**
+     * @param string            $model        模型类
+     * @param string|array|null $filedMapping 字段映射 如果是一维数组则为字段名/类属性名，如果是二维数组则对应关系为 [字段名 => 模型字段名]
+     * @param array|null        $fixed        固定值 比如: 类型=1 或者 状态=1等类似默认值
+     * @param string|null       $modelAlias   别名
+     */
+    public function __construct(
+        public string            $model,
+        public string|array|null $filedMapping = null,
+        public ?array            $fixed = null,
+        public ?string           $modelAlias = null,
+    )
+    {
+    }
+
+}
