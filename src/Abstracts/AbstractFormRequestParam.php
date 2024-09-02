@@ -7,9 +7,9 @@
 namespace Fatbit\FormRequestParam\Abstracts;
 
 use Fatbit\FormRequestParam\Traits\FormRequestParam;
+use Fatbit\FormRequestParam\Traits\ParamModelMapping;
 
-abstract class AbstractFormRequestParam extends AbstractParam implements FormRequestParamInterface
+abstract class AbstractFormRequestParam extends AbstractParam implements FormRequestParamInterface, ParamModelMappingInterface
 {
-    use FormRequestParam;
-
+    use FormRequestParam, ParamModelMapping;
 }
