@@ -47,26 +47,55 @@ trait ParamModelMapping
     /**
      * @inheritDoc
      */
-    public function toModels(string $modelName, ?callable $call = null): array
+    public function toModels(string|array $modelName, ?callable $call = null, bool $isAppend = true): array
     {
         if (empty($this->modelsMapping)) {
             $this->loadModelsMapping();
         }
         if (isset($this->modelsMapping[$modelName])) {
-            return array_map(
-                function ($model) use ($call) {
-                    $model = clone $model;
-                    if (!is_null($call)) {
-                        $call($model);
+            if (is_string($modelName)) {
+                return $this->getModels($modelName, $call);
+            }
+            if (is_array($modelName)) {
+                $models = [];
+                foreach ($modelName as $model) {
+                    if ($isAppend) {
+                        $models = [...$models, ...$this->getModels($model, $call)];
+                    } else {
+                        $models[$model] = $this->getModels($model, $call);
                     }
-
-                    return $model;
-                },
-                $this->modelsMapping[$modelName]
-            );
+                }
+            }
         }
 
         return [];
+    }
+
+    /**
+     * 获取模型数组
+     *
+     * @author XJ.
+     * @Date   2024/9/2 星期一
+     * @template T
+     *
+     * @param string|class-string<T> $modelName
+     * @param callable|null          $call
+     *
+     * @return array|T[]
+     */
+    protected function getModels(string $modelName, ?callable $call = null): array
+    {
+        return array_map(
+            function ($model) use ($call) {
+                $model = clone $model;
+                if (!is_null($call)) {
+                    $call($model);
+                }
+
+                return $model;
+            },
+            $this->modelsMapping[$modelName]
+        );
     }
 
     /**
