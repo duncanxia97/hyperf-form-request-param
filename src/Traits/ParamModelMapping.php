@@ -17,9 +17,9 @@ trait ParamModelMapping
 {
     use GetAttributes;
 
-    protected $modelMapping  = [];
+    protected $modelMapping       = [];
 
-    protected $modelsMapping = [];
+    protected $arrayModelsMapping = [];
 
     /**
      * 获取模型
@@ -47,12 +47,30 @@ trait ParamModelMapping
     /**
      * @inheritDoc
      */
-    public function toModels(string|array $modelName, ?callable $call = null, bool $isAppend = true): array
+    public function toModels(array $modelNames): array
     {
-        if (empty($this->modelsMapping)) {
+        if (empty($this->modelMapping)) {
+            $this->loadModelMapping();
+        }
+        $models = [];
+        foreach ($modelNames as $modelName) {
+            if (isset($this->modelMapping[$modelName])) {
+                $models[] = clone $this->modelMapping[$modelName];
+            }
+        }
+
+        return $models;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function toArrayModels(string|array $modelName, ?callable $call = null, bool $isAppend = true): array
+    {
+        if (empty($this->arrayModelsMapping)) {
             $this->loadModelsMapping();
         }
-        if (isset($this->modelsMapping[$modelName])) {
+        if (isset($this->arrayModelsMapping[$modelName])) {
             if (is_string($modelName)) {
                 return $this->getModels($modelName, $call);
             }
@@ -83,7 +101,7 @@ trait ParamModelMapping
      *
      * @return array|T[]
      */
-    protected function getModels(string $modelName, ?callable $call = null): array
+    protected function getArrayModels(string $modelName, ?callable $call = null): array
     {
         return array_map(
             function ($model) use ($call) {
@@ -94,7 +112,7 @@ trait ParamModelMapping
 
                 return $model;
             },
-            $this->modelsMapping[$modelName]
+            $this->arrayModelsMapping[$modelName]
         );
     }
 
@@ -117,7 +135,7 @@ trait ParamModelMapping
      */
     public function clearArrayModelMapping()
     {
-        $this->modelsMapping = [];
+        $this->arrayModelsMapping = [];
     }
 
     /**
@@ -161,7 +179,7 @@ trait ParamModelMapping
      */
     protected function loadModelsMapping()
     {
-        if (!empty($this->modelsMapping)) {
+        if (!empty($this->arrayModelsMapping)) {
             return;
         }
         foreach (static::getThisProperties() as $thisProperty) {
@@ -169,11 +187,11 @@ trait ParamModelMapping
             foreach ($arrayModelMappings as $arrayModelMapping) {
                 $arrayModelMapping = static::getReflectionAttributeInstance($arrayModelMapping);
                 /** @var ArrayModelMapping $arrayModelMapping */
-                if (!isset($this->modelsMapping[$arrayModelMapping->model])) {
+                if (!isset($this->arrayModelsMapping[$arrayModelMapping->model])) {
                     if (!class_exists($arrayModelMapping->model)) {
                         throw new \ErrorException('class "' . $arrayModelMapping->model . '" does not exist.', 500);
                     }
-                    $this->modelsMapping[$arrayModelMapping->model] = [];
+                    $this->arrayModelsMapping[$arrayModelMapping->model] = [];
                 }
                 $model = new $arrayModelMapping->model;
                 if (!empty($arrayModelMapping->fixed)) {
@@ -198,10 +216,10 @@ trait ParamModelMapping
                             }
                         }
                     }
-                    $this->modelsMapping[$arrayModelMapping->model] = $newModel;
+                    $this->arrayModelsMapping[$arrayModelMapping->model] = $newModel;
                 }
                 if (!empty($arrayModelMapping->modelAlias)) {
-                    $arrayModelMapping->modelAlias = &$this->modelsMapping[$arrayModelMapping->model];
+                    $arrayModelMapping->modelAlias = &$this->arrayModelsMapping[$arrayModelMapping->model];
                 }
             }
         }
