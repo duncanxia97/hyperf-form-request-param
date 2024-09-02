@@ -62,14 +62,15 @@ trait ParamModelMapping
         foreach (static::getThisProperties() as $thisProperty) {
             $modelMappings = static::getPropertyAttributes($thisProperty, ModelMapping::class);
             foreach ($modelMappings as $modelMapping) {
+                $modelMapping = static::getReflectionAttributeInstance($modelMapping);
                 if (!isset($this->modelMapping[$modelMapping->model])) {
                     if (!class_exists($modelMapping->model)) {
                         throw new \ErrorException('class "' . $modelMapping->model . '" does not exist.', 500);
                     }
                     $this->modelMapping[$modelMapping->model] = new $modelMapping->model;
                 }
-                $propertyName                                              = empty($modelMapping->filed) ? $thisProperty->getName(
-                ) : $modelMapping->filed;
+                $propertyName                                              = empty($modelMapping->filed) ?
+                    $thisProperty->getName() : $modelMapping->filed;
                 $this->modelMapping[$modelMapping->model]->{$propertyName} = $this->{$thisProperty->getName()};
                 if (!empty($modelMapping->modelAlias)) {
                     $modelMapping->modelAlias = &$this->modelMapping[$modelMapping->model];
