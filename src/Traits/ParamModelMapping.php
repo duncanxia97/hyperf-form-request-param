@@ -72,15 +72,15 @@ trait ParamModelMapping
         }
         if (isset($this->arrayModelsMapping[$modelName])) {
             if (is_string($modelName)) {
-                return $this->getModels($modelName, $call);
+                return $this->getArrayModels($modelName, $call);
             }
             if (is_array($modelName)) {
                 $models = [];
                 foreach ($modelName as $model) {
                     if ($isAppend) {
-                        $models = [...$models, ...$this->getModels($model, $call)];
+                        $models = [...$models, ...$this->getArrayModels($model, $call)];
                     } else {
-                        $models[$model] = $this->getModels($model, $call);
+                        $models[$model] = $this->getArrayModels($model, $call);
                     }
                 }
                 return $models;
