@@ -83,6 +83,7 @@ trait ParamModelMapping
                         $models[$model] = $this->getModels($model, $call);
                     }
                 }
+                return $models;
             }
         }
 
