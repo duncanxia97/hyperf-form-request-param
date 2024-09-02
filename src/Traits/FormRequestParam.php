@@ -48,7 +48,7 @@ trait FormRequestParam
      */
     protected static function getPropertyFormRequestArrayRules(ReflectionProperty $reflectionProperty): array
     {
-        return static::getPropertyAttributes($reflectionProperty, FormRequestRule::class);
+        return static::getPropertyAttributes($reflectionProperty, FormRequestArrayRule::class);
     }
 
     /**
@@ -81,7 +81,7 @@ trait FormRequestParam
             }
             $formRequestArrayRules = static::getPropertyFormRequestArrayRules($thisProperty);
             foreach ($formRequestArrayRules as $formRequestArrayRule) {
-                $formRequestArrayRule = $formRequestArrayRule->newInstance();
+                $formRequestArrayRule = static::getReflectionAttributeInstance($formRequestArrayRule);
                 /** @var FormRequestArrayRule $formRequestArrayRule */
                 $fieldName              = $name . '.' . $formRequestArrayRule->fieldName;
                 $rules[$fieldName]      = $formRequestArrayRule->rule;
