@@ -53,27 +53,29 @@ class FormRequestParamValidationMiddleware implements MiddlewareInterface
                 if ($method) {
                     $reflectionMethod = ReflectionManager::reflectMethod($requestHandler, $method);
                     $parameters       = $reflectionMethod->getParameters();
-                    foreach ($parameters as $parameter) {
-                        if ($parameter->getType() === null) {
-                            continue;
-                        }
-                        /** @var FormRequestParamInterface $className */
-                        $className = $parameter->getType()->getName();
-                        if (in_array(FormRequestParamInterface::class, class_implements($className))) {
-                            /** @var ValidatorInterface $instance */
-                            $instance = $this->getValidatorInstance($className);
-
-                            if ($instance->fails()) {
-                                $this->failedValidation($instance);
+                        foreach ($parameters as $parameter) {
+                            if ($parameter->getType() === null) {
+                                continue;
                             }
-                            $data = $instance->validated();
-                            $data = array_combine(
-                                array_map(fn($v) => $className::getFieldMapping()[$v] ?? $v, array_keys($data)),
-                                array_values($data)
-                            );
-                            $this->container->set($className, new $className($data));
+                            /** @var FormRequestParamInterface $className */
+                            $className = $parameter->getType()->getName();
+                            if (in_array(FormRequestParamInterface::class, class_implements($className))) {
+                                /** @var ValidatorInterface $instance */
+                                $instance = $this->getValidatorInstance($className);
+
+                                if ($instance->fails()) {
+                                    $this->failedValidation($instance);
+                                }
+                                $validatedData = $instance->validated();
+                                $data = [];
+                                foreach ($className::getFieldMapping() as $key => $toKey){
+                                    if (isset($validatedData[$key])){
+                                        $data[$toKey] = $validatedData[$key];
+                                    }
+                                }
+                                $this->container->set($className, new $className($data));
+                            }
                         }
-                    }
                 }
             } catch (UnauthorizedException $exception) {
                 return $this->handleUnauthorizedException($exception);
