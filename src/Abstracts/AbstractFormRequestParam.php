@@ -9,8 +9,8 @@ namespace Fatbit\FormRequestParam\Abstracts;
 use Fatbit\FormRequestParam\Traits\FormRequestParam;
 use Hyperf\Context\ApplicationContext;
 use Hyperf\Context\Context;
-use Hyperf\Engine\Contract\Http\V2\RequestInterface;
-use Hyperf\Validation\Validator;
+use Hyperf\HttpServer\Contract\RequestInterface;
+use Hyperf\Validation\Contract\ValidatorFactoryInterface as ValidationFactory;
 use function Hyperf\Support\make;
 
 abstract class AbstractFormRequestParam extends AbstractParam implements FormRequestParamInterface
@@ -35,7 +35,7 @@ abstract class AbstractFormRequestParam extends AbstractParam implements FormReq
         return Context::getOrSet(
             'validatedGet:' . static::class,
             function () {
-                $factory = make(Validator::class);
+                $factory = make(ValidationFactory::class);
                 $request = make(RequestInterface::class);
 
                 $data          = array_merge_recursive($request->all(), $request->getUploadedFiles());
