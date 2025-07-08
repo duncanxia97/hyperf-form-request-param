@@ -55,7 +55,7 @@ class FormRequestParamValidationMiddleware implements MiddlewareInterface
                     $reflectionMethod = ReflectionManager::reflectMethod($requestHandler, $method);
                     $parameters       = $reflectionMethod->getParameters();
                     foreach ($parameters as $parameter) {
-                        if ($parameter->getType() === null) {
+                        if ($parameter->getType() === null || $parameter->getType()->isBuiltin()) {
                             continue;
                         }
                         /** @var FormRequestParamInterface $className */
