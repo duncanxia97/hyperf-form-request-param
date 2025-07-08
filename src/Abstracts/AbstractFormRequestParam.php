@@ -9,6 +9,7 @@ namespace Fatbit\FormRequestParam\Abstracts;
 use Fatbit\FormRequestParam\Traits\FormRequestParam;
 use Hyperf\Context\ApplicationContext;
 use Hyperf\Context\Context;
+use Hyperf\Engine\Http\V2\Request;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\Validation\Contract\ValidatorFactoryInterface as ValidationFactory;
 use function Hyperf\Support\make;
@@ -26,12 +27,6 @@ abstract class AbstractFormRequestParam extends AbstractParam implements FormReq
      */
     public static function validatedAndGet(): static
     {
-        if (ApplicationContext::getContainer()
-                              ->has(static::class)) {
-            return ApplicationContext::getContainer()
-                                     ->get(static::class);
-        }
-
         return Context::getOrSet(
             'validatedGet:' . static::class,
             function () {
