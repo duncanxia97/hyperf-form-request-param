@@ -187,6 +187,6 @@ class FormRequestParamValidationMiddleware implements MiddlewareInterface
     {
         $request = make(RequestInterface::class);
 
-        return array_merge_recursive($request->all(), $request->getUploadedFiles());
+        return array_merge_recursive($request->all(), $request->getAttribute(Dispatched::class)?->params ?? [], $request->getUploadedFiles());
     }
 }
