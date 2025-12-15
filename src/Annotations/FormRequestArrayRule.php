@@ -11,7 +11,7 @@ use Hyperf\Contract\Arrayable;
 use Hyperf\Contract\Jsonable;
 use Fatbit\FormRequestParam\Traits\ToArrayJson;
 
-#[\Attribute(\Attribute::TARGET_PROPERTY)]
+#[\Attribute(\Attribute::TARGET_PROPERTY | \Attribute::IS_REPEATABLE)]
 class FormRequestArrayRule implements Arrayable, Jsonable
 {
     use ToArrayJson;
@@ -27,8 +27,7 @@ class FormRequestArrayRule implements Arrayable, Jsonable
         public array|string $rule,
         public string       $attribute,
         public array        $messages = [],
-    )
-    {
+    ) {
     }
 
 }
