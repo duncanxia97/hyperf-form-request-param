@@ -243,8 +243,11 @@ trait FormRequestParam
         $data = [];
         foreach (static::getFieldMapping() as $key => $fieldMapping) {
             if (is_object($fieldMapping)) {
-                $data[$fieldMapping->toKey()] = $fieldMapping->toValue($validatedData);
-                continue;
+                $value = $fieldMapping->toValue($validatedData);
+                if (is_null($value) && !array_key_exists($fieldMapping->sourceKey, $validatedData)) {
+                    continue;
+                }
+                $data[$fieldMapping->toKey()] = $value;
             }
             if (isset($validatedData[$key])) {
                 $data[$fieldMapping] = $validatedData[$key];
