@@ -15,7 +15,8 @@ class ConfigProvider
         return [
             'middlewares' => [
                 'http' => [
-                    FormRequestParamValidationMiddleware::class,
+                    // 验证表单参数最后
+                    FormRequestParamValidationMiddleware::class => -1,
                 ],
             ],
             'annotations' => [

@@ -4,10 +4,11 @@
 
 ## ✨ 主要特性
 
-- 🎯 **自动验证**：基于注解的声明式验证规则，由 Hyperf 自动触发。
-- 🔄 **RequestParam 自动映射**：请求参数自动转换为强类型的 PHP 对象，拒绝弱类型数组地狱。
-- 🧩 **嵌套对象支持**：支持无限层级的嵌套 RequestParam 验证与转换。
+- 🎯 **自动验证**：基于注解的声明式验证规则，由 `Hyperf` 自动触发。
+- 🔄 **`RequestParam` 自动映射**：请求参数自动转换为强类型的 PHP 对象，拒绝弱类型数组地狱。
+- 🧩 **嵌套对象支持**：支持无限层级的嵌套 `RequestParam` 验证与转换。
 - 📦 **复杂类型兼容**：完美支持 `Union Types` (如 `RequestParam|array`)，智能判断并优先实例化对象。
+- ♻️ **复用性强**：支持在控制器方法中自由组合多个 `RequestParam`，灵活应对不同业务场景。
 - 📋 **数组处理**：支持对象数组 (`List<RequestParam>`) 和关联数组 (`Map<string, RequestParam>`) 的自动转换。
 - 🛠 **开箱即用**：提供命令行工具快速生成 RequestParam 类。
 
@@ -56,16 +57,37 @@ class UserRequestParam extends AbstractFormRequestParam
 ```
 
 ### 3. 在控制器中使用
-在控制器方法中直接注入即可自动触发验证：
+在控制器方法中直接注入即可自动触发验证。支持**组合复用**多个 RequestParam，例如将通用的 ID 验证提取为 `IdRequestParam`。
 
 ```php
-class UserController
+namespace App\Controller;
+
+use App\RequestParams\UserRequestParam;
+use App\RequestParams\IdRequestParam;
+
+class UserController extends AbstractController
 {
+    /**
+     * 创建用户
+     * 自动验证 UserRequestParam
+     */
     public function create(UserRequestParam $requestParam)
     {
         // 验证通过后，$requestParam 已经自动填充好数据
         // 直接传入 Service 层，业务逻辑无需再处理参数验证
         return $this->success($this->service->create($requestParam));
+    }
+    
+    /**
+     * 修改用户
+     * ✨ 支持复用：同时注入多个 RequestParam
+     * 自动验证所有注入的参数对象，任何一个验证失败都会终止请求
+     */
+    public function modify(IdRequestParam $idParam, UserRequestParam $userParam)
+    {
+        // $idParam 负责验证 ID 存在性与格式
+        // $userParam 负责验证用户信息的合法性
+        return $this->success($this->service->modify($idParam->id, $userParam));
     }
 }
 ```
