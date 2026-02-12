@@ -13,26 +13,26 @@ use Hyperf\Contract\Arrayable;
 use Hyperf\Contract\Jsonable;
 
 #[\Attribute(\Attribute::TARGET_PROPERTY | \Attribute::IS_REPEATABLE)]
-class FormRequestArrayRule implements Arrayable, Jsonable
+class FormRequestMappingArrayRule extends FormRequestArrayRule
 {
-    use ToArrayJson;
 
     /**
      * @param string|class-string<AbstractFormRequestParam> $fieldName  字段别称
+     * @param string                                        $mappingKey 映射字段
      * @param array|string|null                             $rule       规则
      * @param string|null                                   $attribute  属性(中文)
      * @param array                                         $messages   提示信息
      * @param mixed|null                                    $default    默认值
-     * @param bool|string                                   $arrayField 数组字段(false: 根据fieldName 的内容转换对应的数据.即数组验证为:"array.";true: 为list 即数组验证为:"array.*.";int: 为list 即数组验证为:"array.int.";string: 具体字段转换.即数组验证为:"array.string.")
      */
     public function __construct(
-        public string            $fieldName,
-        public array|string|null $rule = null,
-        public string|null       $attribute = null,
-        public array             $messages = [],
-        public mixed             $default = null,
-        public bool|int|string       $arrayField = false,
+        string            $fieldName,
+        string            $mappingKey,
+        array|string|null $rule = null,
+        string|null       $attribute = null,
+        array             $messages = [],
+        mixed             $default = null,
     ) {
+        parent::__construct($fieldName, $rule, $attribute, $messages, $default, $mappingKey);
     }
 
 }

@@ -6,7 +6,9 @@
 
 namespace Fatbit\FormRequestParam\Traits;
 
+use Fatbit\FormRequestParam\Abstracts\AbstractFormRequestParam;
 use Fatbit\FormRequestParam\Abstracts\FormRequestParamInterface;
+use Fatbit\FormRequestParam\FormRequestFieldMappingParam;
 use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionProperty;
@@ -16,6 +18,7 @@ use Fatbit\FormRequestParam\FormRequestRulesParam;
 
 /**
  * @implements FormRequestParamInterface
+ * @extends AbstractFormRequestParam
  */
 trait FormRequestParam
 {
@@ -39,7 +42,8 @@ trait FormRequestParam
      */
     protected static function getThisProperties(): array
     {
-        return static::getThisReflectionClass()->getProperties();
+        return static::getThisReflectionClass()
+                     ->getProperties();
     }
 
     /**
@@ -80,40 +84,103 @@ trait FormRequestParam
         if (!is_null(static::$formRequestRule)) {
             return static::$formRequestRule;
         }
-        $rules        = [];
-        $attributes   = [];
-        $messages     = [];
-        $fieldMapping = [];
+        $formRequestRuleParam = new FormRequestRulesParam(
+            [
+                'rules'        => [],
+                'attributes'   => [],
+                'messages'     => [],
+                'fieldMapping' => [],
+            ],
+        );
+
         foreach (static::getThisProperties() as $thisProperty) {
             $formRequestRule = static::getPropertyFormRequestRule($thisProperty);
             if (is_null($formRequestRule)) {
                 continue;
             }
-            $name                = $formRequestRule->fieldName ?? $thisProperty->getName();
-            $fieldMapping[$name] = $thisProperty->getName();
-            $rules[$name]        = $formRequestRule->rule;
-            $attributes[$name]   = $formRequestRule->attribute;
-            if ($formRequestRule->messages) {
-                foreach ($formRequestRule->messages as $rule => $message) {
-                    $messages[$name . '.' . $rule] = $message;
+            $name = $formRequestRule->fieldName ?? $thisProperty->getName();
+
+            $type         = $thisProperty->getType();
+            $propertyType = null;
+            $isArray      = false;
+
+            if ($type instanceof \ReflectionNamedType) {
+                $typeName = $type->getName();
+                if ($typeName === 'array') {
+                    $isArray = true;
+                } elseif (!$type->isBuiltin()) {
+                    // ReflectionNamedType::getName() 已经处理了 ? (Nullable) 前缀，直接返回类名
+                    $propertyType = $typeName;
+                } elseif ($typeName === 'object') {
+                    $propertyType = 'object';
                 }
-            }
-            $formRequestArrayRules = static::getPropertyFormRequestArrayRules($thisProperty);
-            foreach ($formRequestArrayRules as $formRequestArrayRule) {
-                $formRequestArrayRule = $formRequestArrayRule->newInstance();
-                /** @var FormRequestArrayRule $formRequestArrayRule */
-                $fieldName              = $name . '.' . $formRequestArrayRule->fieldName;
-                $rules[$fieldName]      = $formRequestArrayRule->rule;
-                $attributes[$fieldName] = $formRequestArrayRule->attribute;
-                if ($formRequestArrayRule->messages) {
-                    foreach ($formRequestArrayRule->messages as $rule => $message) {
-                        $messages[$fieldName . '.' . $rule] = $message;
+            } elseif ($type instanceof \ReflectionUnionType) {
+                foreach ($type->getTypes() as $unionType) {
+                    if ($unionType instanceof \ReflectionNamedType) {
+                        if ($unionType->getName() === 'array') {
+                            $isArray = true;
+                        } elseif (!$unionType->isBuiltin()) {
+                            $propertyType = $unionType->getName();
+                        } elseif ($unionType->getName() === 'object' && $propertyType === null) {
+                            $propertyType = 'object';
+                        }
+                    }
+                }
+            } else {
+                // 兼容 simple type or blank
+                $propertyTypeStr = $type?->__toString();
+                // 简单处理字符串类型（尽量避免使用，优先依赖 Reflection）
+                if ($propertyTypeStr) {
+                    // 移除开头可能存在的 ?
+                    $cleanType = ltrim($propertyTypeStr, '?');
+                    if ($cleanType === 'array') {
+                        $isArray = true;
+                    } elseif (class_exists($cleanType)) {
+                        $propertyType = $cleanType;
+                    } else {
+                        // Fallback
+                        $propertyType = $propertyTypeStr;
                     }
                 }
             }
-        }
 
-        return new FormRequestRulesParam(compact('rules', 'attributes', 'messages', 'fieldMapping'));
+            $toVal         = null;
+            $transformFlag = false;
+            if ($propertyType && class_exists($propertyType) && is_subclass_of($propertyType, AbstractFormRequestParam::class)) {
+                $toVal         = $propertyType;
+                $transformFlag = true;
+            }
+
+            $formRequestRuleParam->appendFieldMapping(
+                $name,
+                new FormRequestFieldMappingParam(
+                    [
+                        'toKey'        => $thisProperty->getName(),
+                        'sourceKey'    => $name,
+                        'toVal'        => $toVal,
+                        'propertyType' => $propertyType,
+                        'isArray'      => $isArray,
+                        'default'      => $formRequestRule->default ?? null,
+                    ],
+                ),
+            );
+            // 添加规则
+            $formRequestRuleParam->appendByFormRequestRule($name, $formRequestRule);
+            $formRequestArrayRules = static::getPropertyFormRequestArrayRules($thisProperty);
+            if (empty($formRequestArrayRules)) {
+                if ($transformFlag) {
+                    $formRequestRuleParam->appendByFormRequestParamInterface($name, $toVal, $name);
+                }
+                continue;
+            }
+            foreach ($formRequestArrayRules as $formRequestArrayRule) {
+                $formRequestArrayRule = $formRequestArrayRule->newInstance();
+                /** @var FormRequestArrayRule $formRequestArrayRule */
+                // 如果定义为数组 则需要添加数组的验证规则
+                $formRequestRuleParam->appendByFormRequestArrayRule($name, $formRequestArrayRule);
+            }
+        }
+        return $formRequestRuleParam;
     }
 
     /**
@@ -132,7 +199,7 @@ trait FormRequestParam
      *
      * @author XJ.
      * @Date   2023/8/28 0028
-     * @return array
+     * @return array|array<string, FormRequestFieldMappingParam>
      */
     public static function getFieldMapping(): array
     {
@@ -159,6 +226,32 @@ trait FormRequestParam
     public static function getMessages(): array
     {
         return static::getFormRequestRule()->messages;
+    }
+
+    /**
+     * 转换数据
+     *
+     * @author XJ.
+     * @Date   2026/2/10
+     *
+     * @param array $validatedData
+     *
+     * @return static
+     */
+    public static function transformSelf(array $validatedData): static
+    {
+        $data = [];
+        foreach (static::getFieldMapping() as $key => $fieldMapping) {
+            if (is_object($fieldMapping)) {
+                $data[$fieldMapping->toKey()] = $fieldMapping->toValue($validatedData);
+                continue;
+            }
+            if (isset($validatedData[$key])) {
+                $data[$fieldMapping] = $validatedData[$key];
+            }
+        }
+
+        return new static($data);
     }
 
 }

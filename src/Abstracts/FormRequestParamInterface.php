@@ -44,4 +44,16 @@ interface FormRequestParamInterface
      */
     public static function getMessages(): array;
 
+    /**
+     * 转换数据
+     *
+     * @author XJ.
+     * @Date   2026/2/10
+     *
+     * @param array $validatedData
+     *
+     * @return static
+     */
+    public static function transformSelf(array $validatedData): static;
+
 }

@@ -7,6 +7,8 @@ namespace %NAMESPACE%;
 use Fatbit\FormRequestParam\Abstracts\AbstractFormRequestParam;
 use Fatbit\FormRequestParam\Annotations\FormRequestRule;
 use Fatbit\FormRequestParam\Annotations\FormRequestArrayRule;
+use Fatbit\FormRequestParam\Annotations\FormRequestMappingArrayRule;
+use Fatbit\FormRequestParam\Annotations\FormRequestListArrayRule;
 
 class %CLASS% extends AbstractFormRequestParam
 {

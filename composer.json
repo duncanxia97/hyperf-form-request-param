@@ -17,11 +17,14 @@
     }
   ],
   "require": {
-    "php": "^8.0",
+    "php": "^8.1",
     "hyperf/validation": "^3.0.0",
     "hyperf/contract": "^3.0.0",
     "hyperf/devtool": "^3.0.0",
-    "hyperf/http-server": "^3.0.0"
+    "hyperf/http-server": "^3.0.0",
+    "fatbit/utils": "dev-main"
+  },
+  "require-dev": {
   },
   "autoload": {
     "psr-4": {
@@ -32,5 +35,11 @@
     "hyperf": {
       "config": "Fatbit\\FormRequestParam\\ConfigProvider"
     }
-  }
+  },
+  "repositories": [
+    {
+      "type": "git",
+      "url": "https://github.com/duncanxia97/php-utils"
+    }
+  ]
 }

@@ -55,26 +55,24 @@ class FormRequestParamValidationMiddleware implements MiddlewareInterface
                     $reflectionMethod = ReflectionManager::reflectMethod($requestHandler, $method);
                     $parameters       = $reflectionMethod->getParameters();
                     foreach ($parameters as $parameter) {
-                        if ($parameter->getType() === null || $parameter->getType()->isBuiltin()) {
+                        if ($parameter->getType() === null
+                            || $parameter
+                                ->getType()
+                                ->isBuiltin()) {
                             continue;
                         }
                         /** @var FormRequestParamInterface $className */
-                        $className = $parameter->getType()->getName();
-                        if (in_array(FormRequestParamInterface::class, class_implements($className))) {
+                        $className = $parameter
+                            ->getType()
+                            ->getName();
+                        if (is_a($className, FormRequestParamInterface::class, true)) {
                             /** @var ValidatorInterface $instance */
                             $instance = $this->getValidatorInstance($className);
 
                             if ($instance->fails()) {
                                 $this->failedValidation($instance);
                             }
-                            $validatedData = $instance->validated();
-                            $data = [];
-                            foreach ($className::getFieldMapping() as $key => $toKey){
-                                if (isset($validatedData[$key])){
-                                    $data[$toKey] = $validatedData[$key];
-                                }
-                            }
-                            $this->container->set($className, new $className($data));
+                            $this->container->set($className, $className::transformSelf($instance->validated()));
                         }
                     }
                 }
@@ -148,7 +146,7 @@ class FormRequestParamValidationMiddleware implements MiddlewareInterface
                 }
 
                 return $validator;
-            }
+            },
         );
     }
 
@@ -176,7 +174,7 @@ class FormRequestParamValidationMiddleware implements MiddlewareInterface
             $this->validationData(),
             $formRequestParam::getRules(),
             $formRequestParam::getMessages(),
-            $formRequestParam::getAttributes()
+            $formRequestParam::getAttributes(),
         );
     }
 

@@ -7,9 +7,8 @@
 namespace Fatbit\FormRequestParam\Abstracts;
 
 use Fatbit\FormRequestParam\Traits\FormRequestParam;
-use Hyperf\Context\ApplicationContext;
+use Fatbit\Utils\Params\AbstractParam;
 use Hyperf\Context\Context;
-use Hyperf\Engine\Http\V2\Request;
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\Validation\Contract\ValidatorFactoryInterface as ValidationFactory;
 use function Hyperf\Support\make;
@@ -42,14 +41,9 @@ abstract class AbstractFormRequestParam extends AbstractParam implements FormReq
                         static::getAttributes(),
                     )
                     ->validated();
-                $data          = [];
-                foreach (static::getFieldMapping() as $key => $toKey) {
-                    if (isset($validatedData[$key])) {
-                        $data[$toKey] = $validatedData[$key];
-                    }
-                }
 
-                return new static($data);
+                return static::transformSelf($validatedData);
+
             },
         );
     }
