@@ -248,6 +248,7 @@ trait FormRequestParam
                     continue;
                 }
                 $data[$fieldMapping->toKey()] = $value;
+                continue;
             }
             if (isset($validatedData[$key])) {
                 $data[$fieldMapping] = $validatedData[$key];
