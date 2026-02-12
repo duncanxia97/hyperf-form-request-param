@@ -42,7 +42,12 @@ class FormRequestFieldMappingParam extends AbstractParam
      *
      * @var bool
      */
-    public bool $isArray = false;
+    public bool $isArray  = false;
+
+    /**
+     * @var bool
+     */
+    public bool $nullable = false;
 
     /**
      * 转换值
@@ -111,7 +116,7 @@ class FormRequestFieldMappingParam extends AbstractParam
         if ($targetClass && is_subclass_of($targetClass, AbstractFormRequestParam::class)) {
             $reflection = new \ReflectionClass($targetClass);
             if ($reflection->isInstantiable()) {
-                $param = new $targetClass($value);
+                $param = $targetClass::transformSelf($value);
 
                 if ($this->isArray && empty($this->propertyType)) {
                     return $param->toArray();

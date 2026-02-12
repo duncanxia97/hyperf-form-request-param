@@ -103,9 +103,13 @@ trait FormRequestParam
             $type         = $thisProperty->getType();
             $propertyType = null;
             $isArray      = false;
+            $nullable     = false;
 
             if ($type instanceof \ReflectionNamedType) {
                 $typeName = $type->getName();
+                if ($type->allowsNull()) {
+                    $nullable = true;
+                }
                 if ($typeName === 'array') {
                     $isArray = true;
                 } elseif (!$type->isBuiltin()) {
@@ -113,6 +117,9 @@ trait FormRequestParam
                     $propertyType = $typeName;
                 } elseif ($typeName === 'object') {
                     $propertyType = 'object';
+                    if (class_exists($formRequestRule->rule) && is_subclass_of($formRequestRule->rule, AbstractFormRequestParam::class)) {
+                        $propertyType = $formRequestRule->rule;
+                    }
                 }
             } elseif ($type instanceof \ReflectionUnionType) {
                 foreach ($type->getTypes() as $unionType) {
@@ -123,6 +130,12 @@ trait FormRequestParam
                             $propertyType = $unionType->getName();
                         } elseif ($unionType->getName() === 'object' && $propertyType === null) {
                             $propertyType = 'object';
+                            if (class_exists($formRequestRule->rule) && is_subclass_of($formRequestRule->rule, AbstractFormRequestParam::class)) {
+                                $propertyType = $formRequestRule->rule;
+                            }
+                        }
+                        if ($unionType->allowsNull()) {
+                            $nullable = true;
                         }
                     }
                 }
@@ -132,6 +145,9 @@ trait FormRequestParam
                 // 简单处理字符串类型（尽量避免使用，优先依赖 Reflection）
                 if ($propertyTypeStr) {
                     // 移除开头可能存在的 ?
+                    if (strpos($propertyTypeStr, '?') === 0) {
+                        $nullable = true;
+                    }
                     $cleanType = ltrim($propertyTypeStr, '?');
                     if ($cleanType === 'array') {
                         $isArray = true;
@@ -161,6 +177,7 @@ trait FormRequestParam
                         'propertyType' => $propertyType,
                         'isArray'      => $isArray,
                         'default'      => $formRequestRule->default ?? null,
+                        'nullable'     => $nullable,
                     ],
                 ),
             );
@@ -244,7 +261,7 @@ trait FormRequestParam
         foreach (static::getFieldMapping() as $key => $fieldMapping) {
             if (is_object($fieldMapping)) {
                 $value = $fieldMapping->toValue($validatedData);
-                if (is_null($value) && !array_key_exists($fieldMapping->sourceKey, $validatedData)) {
+                if (is_null($value) && !$fieldMapping->nullable && !array_key_exists($fieldMapping->sourceKey, $validatedData)) {
                     continue;
                 }
                 $data[$fieldMapping->toKey()] = $value;
